@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-//wants to like a post
+//This middleware check, is user valid to to this action? such as wants to like a post.
 //click the like button => the auth middleware check, is user valid or not? if user valid it just call (next) => to create like 
 
 const auth = async (req, res, next) => {
@@ -17,7 +17,7 @@ const auth = async (req, res, next) => {
         if(token && isCustomAuth){
             //it gives us data for specific token
             decodedData = jwt.verify(token, 'test');
-
+            // push on the req userId.
             req.userId = decodedData?.id;
         }
         else{
