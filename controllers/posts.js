@@ -4,20 +4,21 @@ import express from 'express';
 import PostMessage from "../models/postMessage.js"
 
 export const getPosts = async (req, res) => {
-    const {page} = req.query;
-   
-
+    const { page } = req.query;
     try {
         const LIMIT = 8;
         const startIndex = (Number(page) - 1) * LIMIT //get the starting index of every page.
+        console.log('get hit')
         const total = await PostMessage.countDocuments({});
 
-        const posts = await PostMessage.find().sort({_id: -1}).limit(LIMIT).skip(startIndex); 
+        const posts = await PostMessage.find().sort({ _id: -1 }).limit(LIMIT).skip(startIndex);
         //it gives us the newest post in as a first item.
-        console.log('get successful')
-        res.status(200).json({data : posts, currentPage: Number(page), numberOfPage: Math.ceil(total / LIMIT)});
+        console.log('get successful');
+        // console.log(posts)
+        res.status(200).json({ data: posts, currentPage: Number(page), numberOfPages: Math.ceil(total / LIMIT) });
     }
     catch (error) {
+        console.log('get failure')
         res.status(400).json({ message: error.message })
     }
 }
@@ -27,6 +28,7 @@ export const getPostsBySearch = async (req, res) => {
     const { searchQuery, tags } = req.query;
 
     try {
+        console.log('search hit')
         const title = new RegExp(searchQuery, 'i'); //(i) means-->it ignore case sensitive [Test,tesT,TEST]
 
         // below '$or' means --> find the data if it matched by either searchQuery or tags.
@@ -34,6 +36,7 @@ export const getPostsBySearch = async (req, res) => {
         const posts = await PostMessage.find({ $or: [{ title }, { tags: tags.split(',') }] });
 
         res.json({ data: posts })
+        console.log('search success')
 
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -49,8 +52,9 @@ export const createPost = async (req, res) => {
     const newPostMessage = new PostMessage({ ...post, creator: req.userId, createdAt: new Date().toISOString() })
 
     try {
+        console.log('create-hit')
         await newPostMessage.save();
-
+        console.log('create-success')
         res.status(201).json(newPostMessage);
     } catch (error) {
         res.status(409).json({ message: error.message });
