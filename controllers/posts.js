@@ -3,6 +3,19 @@ import mongoose from 'mongoose';
 import express from 'express';
 import PostMessage from "../models/postMessage.js"
 
+export const getPost = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+       
+        const post = await PostMessage.findById(id);
+        
+        res.status(200).json(post);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
+
 export const getPosts = async (req, res) => {
     const { page } = req.query;
     try {
@@ -28,7 +41,7 @@ export const getPostsBySearch = async (req, res) => {
     const { searchQuery, tags } = req.query;
 
     try {
-        console.log('search hit')
+        
         const title = new RegExp(searchQuery, 'i'); //(i) means-->it ignore case sensitive [Test,tesT,TEST]
 
         // below '$or' means --> find the data if it matched by either searchQuery or tags.
@@ -36,7 +49,7 @@ export const getPostsBySearch = async (req, res) => {
         const posts = await PostMessage.find({ $or: [{ title }, { tags: tags.split(',') }] });
 
         res.json({ data: posts })
-        console.log('search success')
+        
 
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -52,9 +65,9 @@ export const createPost = async (req, res) => {
     const newPostMessage = new PostMessage({ ...post, creator: req.userId, createdAt: new Date().toISOString() })
 
     try {
-        console.log('create-hit')
+        
         await newPostMessage.save();
-        console.log('create-success')
+        
         res.status(201).json(newPostMessage);
     } catch (error) {
         res.status(409).json({ message: error.message });
